@@ -1,40 +1,87 @@
-(function(){
-  var root=document.documentElement;
-  
-  // Theme toggle
-  try{var saved=localStorage.getItem("theme");if(saved)root.setAttribute("data-theme",saved);}catch(e){}
-  document.getElementById("theme").addEventListener("click",function(){
-    var dark=root.getAttribute("data-theme")==="dark";
-    var next=dark?"light":"dark";
-    root.setAttribute("data-theme",next);
-    try{localStorage.setItem("theme",next);}catch(e){}
+const root = document.documentElement;
+
+// dark / light button
+try {
+  const saved = localStorage.getItem("theme");
+  if (saved) root.setAttribute("data-theme", saved);
+} catch (e) {}
+
+document.getElementById("theme").addEventListener("click", function () {
+  const isDark = root.getAttribute("data-theme") === "dark";
+  const next = isDark ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try {
+    localStorage.setItem("theme", next);
+  } catch (e) {}
+});
+
+// menu button on phones
+const menuBtn = document.getElementById("menu");
+const navList = document.getElementById("navlist");
+
+menuBtn.addEventListener("click", function () {
+  const open = navList.classList.toggle("open");
+  menuBtn.setAttribute("aria-expanded", open);
+});
+
+// close the menu after clicking a link
+navList.addEventListener("click", function (e) {
+  if (e.target.matches("a")) {
+    navList.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded", "false");
+  }
+});
+
+// highlight the nav link of the section on screen
+const links = document.querySelectorAll("a.link");
+
+const observer = new IntersectionObserver(
+  function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        links.forEach(function (a) {
+          a.classList.toggle("on", a.getAttribute("href") === "#" + entry.target.id);
+        });
+      }
+    });
+  },
+  { rootMargin: "-40% 0px -55% 0px" }
+);
+
+document.querySelectorAll("main section").forEach(function (s) {
+  observer.observe(s);
+});
+
+// project filter buttons (All / Python / Web)
+const filterBtns = document.querySelectorAll(".filters button");
+const cards = document.querySelectorAll(".card");
+
+filterBtns.forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    filterBtns.forEach(function (b) {
+      b.setAttribute("aria-pressed", b === btn);
+    });
+    cards.forEach(function (card) {
+      card.hidden = !(btn.dataset.f === "all" || card.dataset.t === btn.dataset.f);
+    });
   });
+});
 
-  // Mobile menu
-  var menu=document.getElementById("menu"),list=document.getElementById("navlist");
-  menu.addEventListener("click",function(){var o=list.classList.toggle("open");menu.setAttribute("aria-expanded",o);});
-  list.addEventListener("click",function(e){if(e.target.matches("a")){list.classList.remove("open");menu.setAttribute("aria-expanded","false");}});
+// contact form - opens the email app
+// TODO: put my real email here
+const myEmail = "your.email@example.com";
 
-  // Highlight current section in nav
-  var links=[].slice.call(document.querySelectorAll("a.link"));
-  var io=new IntersectionObserver(function(es){es.forEach(function(en){
-    if(en.isIntersecting){links.forEach(function(a){a.classList.toggle("on",a.getAttribute("href")==="#"+en.target.id);});}
-  });},{rootMargin:"-40% 0px -55% 0px"});
-  document.querySelectorAll("main section").forEach(function(s){io.observe(s);});
+document.getElementById("form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const name = document.getElementById("n").value;
+  const email = document.getElementById("e").value;
+  const msg = document.getElementById("m").value;
 
-  // Project filter
-  var btns=document.querySelectorAll(".filters button"),cards=document.querySelectorAll(".card");
-  btns.forEach(function(b){b.addEventListener("click",function(){
-    btns.forEach(function(x){x.setAttribute("aria-pressed",x===b);});
-    cards.forEach(function(c){c.hidden=!(b.dataset.f==="all"||c.dataset.t===b.dataset.f);});
-  });});
+  location.href =
+    "mailto:" + myEmail +
+    "?subject=" + encodeURIComponent("Portfolio message from " + name) +
+    "&body=" + encodeURIComponent(msg + "\n\n" + name + " (" + email + ")");
+});
 
-  // Contact form -> mailto (replace the address below with your own)
-  var TO="your.email@example.com";
-  document.getElementById("form").addEventListener("submit",function(ev){
-    ev.preventDefault();
-    var n=document.getElementById("n").value,e=document.getElementById("e").value,m=document.getElementById("m").value;
-    location.href="mailto:"+TO+"?subject="+encodeURIComponent("Portfolio message from "+n)+"&body="+encodeURIComponent(m+"\n\n"+n+" ("+e+")");
-  });
-  document.getElementById("yr").textContent=new Date().getFullYear();
-})();
+// year in the footer
+document.getElementById("yr").textContent = new Date().getFullYear();

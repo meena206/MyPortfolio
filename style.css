@@ -113,14 +113,23 @@ header {
   text-decoration: none;
 }
 
-/* my logo, colored with the indigo */
-.mark {
+/* my logo - two images, one for light mode and one for dark mode */
+.logo img {
   display: block;
-  width: 75px;
   height: 44px;
-  background: var(--indigo);
-  -webkit-mask: var(--m) center / contain no-repeat;
-  mask: var(--m) center / contain no-repeat;
+  width: auto;
+}
+
+.logo .logo-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .logo .logo-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .logo .logo-dark {
+  display: block;
 }
 
 nav ul {
